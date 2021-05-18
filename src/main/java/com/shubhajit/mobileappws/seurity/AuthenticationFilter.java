@@ -2,6 +2,7 @@ package com.shubhajit.mobileappws.seurity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shubhajit.mobileappws.SpringApplicationContext;
+import com.shubhajit.mobileappws.exceptions.TechnicalException;
 import com.shubhajit.mobileappws.service.UserService;
 import com.shubhajit.mobileappws.shared.dto.UserDto;
 import com.shubhajit.mobileappws.web.model.request.UserLoginRequest;
@@ -35,11 +36,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         try {
             UserLoginRequest credentials = new ObjectMapper()
                     .readValue(request.getInputStream(), UserLoginRequest.class);
-            return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            credentials.getEmail(), credentials.getPassword(), new ArrayList<>()));
+            final UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
+                    credentials.getEmail(), credentials.getPassword(), new ArrayList<>());
+            return authenticationManager.authenticate(authRequest);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new TechnicalException(e);
         }
     }
 

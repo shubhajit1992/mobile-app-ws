@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -39,14 +40,8 @@ public class UserServiceImpl implements UserService {
     public UserDto createUser(UserDto user) {
 
         if (userRepository.findByEmail(user.getEmail()) != null)
-            throw new RuntimeException("Record already exists");
+            throw new UserServiceException(ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
 
-        /*for (int i = 0; i < user.getAddresses().size(); i++) {
-            AddressDto address = user.getAddresses().get(i);
-            address.setUserDetails(user);
-            address.setAddressId(utils.generateAddressId(30));
-            user.getAddresses().set(i, address);
-        }*/
         List<AddressDto> addresses = new ArrayList<>();
         for (AddressDto address : user.getAddresses()) {
             address.setUserDetails(user);
@@ -54,8 +49,7 @@ public class UserServiceImpl implements UserService {
             addresses.add(address);
         }
         user.setAddresses(addresses);
-        // UserEntity userEntity = new UserEntity();
-        // BeanUtils.copyProperties(user, userEntity);
+
         ModelMapper modelMapper = new ModelMapper();
         UserEntity userEntity = modelMapper.map(user, UserEntity.class);
 
@@ -67,8 +61,6 @@ public class UserServiceImpl implements UserService {
 
         UserEntity storedUserDetails = userRepository.save(userEntity);
 
-        /*UserDto returnValue = new UserDto();
-        BeanUtils.copyProperties(storedUserDetails, returnValue);*/
         return modelMapper.map(storedUserDetails, UserDto.class);
     }
 
@@ -150,9 +142,10 @@ public class UserServiceImpl implements UserService {
     public boolean verifyEmailToken(String token) {
         boolean returnValue = false;
 
-        UserEntity userEntity = userRepository.findByEmailVerificationToken(token);
+        Optional<UserEntity> optionalUserEntity = userRepository.findByEmailVerificationToken(token);
 
-        if (userEntity != null) {
+        if (optionalUserEntity.isPresent()) {
+            UserEntity userEntity = optionalUserEntity.get();
             boolean hasTokenExpired = utils.hasTokenExpired(token);
             if (!hasTokenExpired) {
                 userEntity.setEmailVerificationToken(null);
@@ -171,7 +164,7 @@ public class UserServiceImpl implements UserService {
 
         if (userEntity == null)
             throw new UsernameNotFoundException(email);
-        // return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
+
         return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(),
                 userEntity.getEmailVerificationStatus(), true, true,
                 true, new ArrayList<>());

@@ -1,8 +1,8 @@
 package com.shubhajit.mobileappws.shared.dto;
 
-import java.util.List;
+import java.io.Serializable;
 
-public class AddressDto {
+public class AddressDto implements Serializable {
     private Long id; // id from database
     private String addressId; // public address id
     private String city;

@@ -2,7 +2,7 @@ package com.shubhajit.mobileappws.web.model.request;
 
 public class UserLoginRequest {
     private String email;
-    private String Password;
+    private String password;
 
     public String getEmail() {
         return email;
@@ -13,10 +13,10 @@ public class UserLoginRequest {
     }
 
     public String getPassword() {
-        return Password;
+        return password;
     }
 
     public void setPassword(String password) {
-        Password = password;
+        this.password = password;
     }
 }
